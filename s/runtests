@@ -1,8 +1,24 @@
 #!/bin/sh
 
-unit_tests() {
+[ -n "$CC" ] || [ -z `which clang` ] || CC=clang
+[ -n "$CC" ] || [ -z `which g++` ] || CC=g++
+echo "compiler: $CC"
+
+build() {
+  CC=$CC make
+}
+
+integration_tests() {
   make test
 }
 
+valgrind_tests() {
+  make valgrind
+}
+
 set -e
-unit_tests
+build
+integration_tests
+
+## disable valgrind test, it is getting killed on the travis build machines
+# valgrind_tests
