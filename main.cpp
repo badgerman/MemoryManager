@@ -56,8 +56,8 @@ public:
 	}
 };
 
-mm* Mem;
-int UID = 0;
+static mm* Mem;
+static int UID = 0;
 
 static int atoi_s(const char *arg, int def) {
     int val = atoi(arg);
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     }
     assert(m>0 && n>0 && sx<=m && sy<=n && gx<=m && gy<=n);
     printf("m=%d, n=%d, gx=%d, gy=%d\n", m, n, gx, gy);
-	Mem = (mm*)&(mm::get());
+	Mem = static_cast<mm*>(&mm::get());
 	Pointer<Node> *test;
 	test = new Pointer<Node>[n*m];
 	Pointer<Node> walker;
