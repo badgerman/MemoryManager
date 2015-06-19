@@ -1,6 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <type_traits>
 
 #define INITIAL_SIZE 5
@@ -88,7 +89,7 @@ class Pointer {
 private:
     unsigned int index;
 	size_t size;
-	void Set(int i);
+	void Set(unsigned int i);
     unsigned int GetIndex() const{
 		return index;
 	}
@@ -100,17 +101,17 @@ public:
 		Init();
 	}
 	void Init(){
-		index = -1;
+		index = UINT_MAX;
 		size = sizeof(T);
 	}
 	~Pointer(){
 		if (IsGood()) {
 			mmDestroy(Get());
 		}
-		Set(-1);
+		Set(UINT_MAX);
 	}
 	void Clear() {
-		Set(-1);
+		Set(UINT_MAX);
 	}
 	bool IsGood(){
 		if (size > 0 && index >= 0)
@@ -138,7 +139,7 @@ class mm {
 private:
 	char** tables;
 	unsigned int* sizes;
-	int* goodIndex;
+    unsigned int* goodIndex;
 	unsigned int NumTables;
 	void GrowTable(unsigned int index){
         unsigned int newsize = sizes[index] * 2;
@@ -152,20 +153,20 @@ private:
 			delete [] tables[index];
 		}
 		tables[index] = newtable;
-		int oldsize = sizes[index];
+        size_t oldsize = sizes[index];
 		sizes[index] = newsize;
 
-		for (int i = oldsize; i < newsize; ++i) {
-			*(static_cast<int*>(GetObject(i, index)) + (sizeof(void*) / sizeof(int))) = i + 1;
+        for (size_t i = oldsize; i < newsize; ++i) {
+			*(static_cast<size_t*>(GetObject(i, index)) + (sizeof(void*) / sizeof(size_t))) = i + 1;
 		}
 		*(static_cast<int*>(GetObject(newsize - 1, index)) + (sizeof(void*) / sizeof(int))) = -1;
 		goodIndex[index] = oldsize;
 	}
-	void GrowTables(int NewTable){
+	void GrowTables(unsigned int NewTable){
 		if (NewTable < NumTables) {
 			return;
 		}
-		char** temp = new(char*[NewTable + 1]);
+		char** temp = new char*[NewTable + 1];
 		memset(temp, 0, (NewTable + 1) * sizeof(int));
 		if (NumTables > 0)
 			memcpy(temp, tables, sizeof(int) * (NumTables));
@@ -179,7 +180,7 @@ private:
 		delete sizes;
 		sizes = tempsizes;
 
-		int* tempGoodIndex = new(int[NewTable + 1]);
+		unsigned int* tempGoodIndex = new unsigned int[NewTable + 1];
 		memset(tempGoodIndex, 0, (NewTable + 1)*sizeof(int));
 		if (NumTables > 0)
 			memcpy(tempGoodIndex, goodIndex, sizeof(int) * (NumTables));
@@ -193,7 +194,7 @@ private:
 		sizes = 0;
 		NumTables = 0;
 	}
-	int Allocate(size_t size){
+    unsigned int Allocate(size_t size){
 		if (NumTables == 0 || NumTables < size) {
 			GrowTables(size);
 			GrowTable(size);
@@ -204,7 +205,7 @@ private:
 		//Find free memory
 		if (size < 4) {
 			//not bothering with optimization for objects of 1-3 bytes
-			int i = 0;
+			unsigned int i = 0;
 			while (i < sizes[size]) {
 				if (*(static_cast<int*>(static_cast<void *>(&tables[size][i*(sizeof(int) + size)]))) == 0)
 					break;
@@ -220,22 +221,20 @@ private:
 			}
 		}
 		else {
-			if (goodIndex[size] == -1) {
+			if (goodIndex[size] == UINT_MAX) {
 				GrowTable(size);
 				return Allocate(size);
 			}
 			else {
-				int index = goodIndex[size];
-				goodIndex[size] = *((static_cast<int*>(GetObject(goodIndex[size], size))) + 1);
+				unsigned int index = goodIndex[size];
+				goodIndex[size] = *((static_cast<unsigned int*>(GetObject(goodIndex[size], size))) + 1);
 				memset(&tables[size][index*(sizeof(int) + size)], 0, sizeof(int) + size);
 				return index;
 			}
 		}
 	}
 	void* GetObject(unsigned int index, size_t size) {
-		if (index < 0)
-			return 0;
-		if (size < 1)
+		if (index == UINT_MAX)
 			return 0;
 		if (tables == 0)
 			return 0;
@@ -247,9 +246,9 @@ private:
 			return 0;
 		return static_cast<void*>(&tables[size][index*(size + sizeof(int))]);
 	}
-	void GC(int index, size_t size) {
+	void GC(unsigned int index, size_t size) {
 		if (size >= 4) {
-			int* obj = static_cast<int*>(GetObject(index, size));
+			unsigned int* obj = static_cast<unsigned int*>(GetObject(index, size));
 			if (obj && *obj == 0) {
 				*(obj + (sizeof(void*) / sizeof(int))) = goodIndex[size];
 				goodIndex[size] = index;
@@ -288,7 +287,7 @@ public:
 };
 
 
-template<class T> void Pointer<T>::Set(int i) {
+template<class T> void Pointer<T>::Set(unsigned int i) {
    int* count = static_cast<int*>(mm::get().GetObject(index, size));
    if (count != 0) {
        (*count)--;

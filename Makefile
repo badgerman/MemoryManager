@@ -1,14 +1,7 @@
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g -std=c++0x
 
 ifeq "$(CC)" "clang"
-CFLAGS += -Weverything -std=c++11 -Wno-c++98-compat -Wno-padded
-else
-GCC_HAS_STDC_FLAG = $(shell expr `g++ -dumpversion | cut -f1-2 -d.` \>= 4.7)
-ifeq "$(GCC_HAS_STDC_FLAG)" "1"
-CFLAGS+=-std=c++11
-else
-CFLAGS+=-std=c++0x
-endif
+CFLAGS += -Weverything -std=c++11 -Wno-c++98-compat -Wno-padded -Wno-exit-time-destructors
 endif
 
 all: bin/mm
