@@ -86,13 +86,13 @@ template <class T>
 class Pointer {
 	friend class Pointer < T >;
 private:
-	int index;
+    unsigned int index;
 	size_t size;
 	void Set(int i);
-	int GetIndex() const{
+    unsigned int GetIndex() const{
 		return index;
 	}
-	int GetSize() const{
+    size_t GetSize() const{
 		return size;
 	}
 public:
