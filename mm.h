@@ -85,15 +85,15 @@ void mmDestroy(T & val) {
 
 template <class T>
 class Pointer {
-	friend class Pointer < T >;
+	friend class Pointer < T > ;
 private:
-    unsigned int index;
+	unsigned int index;
 	size_t size;
 	void Set(unsigned int i);
-    unsigned int GetIndex() const{
+	unsigned int GetIndex() const{
 		return index;
 	}
-    size_t GetSize() const{
+	size_t GetSize() const{
 		return size;
 	}
 public:
@@ -139,10 +139,10 @@ class mm {
 private:
 	char** tables;
 	unsigned int* sizes;
-    unsigned int* goodIndex;
+	unsigned int* goodIndex;
 	unsigned int NumTables;
 	void GrowTable(unsigned int index){
-        unsigned int newsize = sizes[index] * 2;
+		unsigned int newsize = sizes[index] * 2;
 		if (newsize == 0) {
 			newsize = INITIAL_SIZE;
 		}
@@ -150,13 +150,13 @@ private:
 		memset(newtable, 0, (index + sizeof(int))*newsize);
 		if (sizes[index] > 0){
 			memcpy(newtable, tables[index], (index + sizeof(int))*sizes[index]);
-			delete [] tables[index];
+			delete[] tables[index];
 		}
 		tables[index] = newtable;
-        size_t oldsize = sizes[index];
+		size_t oldsize = sizes[index];
 		sizes[index] = newsize;
 
-        for (size_t i = oldsize; i < newsize; ++i) {
+		for (size_t i = oldsize; i < newsize; ++i) {
 			*(static_cast<size_t*>(GetObject(i, index)) + (sizeof(void*) / sizeof(size_t))) = i + 1;
 		}
 		*(static_cast<int*>(GetObject(newsize - 1, index)) + (sizeof(void*) / sizeof(int))) = -1;
@@ -194,7 +194,7 @@ private:
 		sizes = 0;
 		NumTables = 0;
 	}
-    unsigned int Allocate(size_t size){
+	unsigned int Allocate(size_t size){
 		if (NumTables == 0 || NumTables < size) {
 			GrowTables(size);
 			GrowTable(size);
@@ -288,33 +288,33 @@ public:
 
 
 template<class T> void Pointer<T>::Set(unsigned int i) {
-   int* count = static_cast<int*>(mm::get().GetObject(index, size));
-   if (count != 0) {
-       (*count)--;
-       mm::get().GC(index, size);
-   }
-   index = i;
-   count = static_cast<int*>(mm::get().GetObject(index, size));
-   if (count != 0)
-       (*count)++;
+	int* count = static_cast<int*>(mm::get().GetObject(index, size));
+	if (count != 0) {
+		(*count)--;
+		mm::get().GC(index, size);
+	}
+	index = i;
+	count = static_cast<int*>(mm::get().GetObject(index, size));
+	if (count != 0)
+		(*count)++;
 }
 
 template<class T> void Pointer<T>::Allocate() {
-   Set(mm::get().Allocate(size));
-   if (IsGood()) {
-       T* t = &Get();
-       mmInitialize<T>(*t);
-   }
+	Set(mm::get().Allocate(size));
+	if (IsGood()) {
+		T* t = &Get();
+		mmInitialize<T>(*t);
+	}
 }
 
 template<class T> T& Pointer<T>::operator* () {
-   return *(static_cast<T*>(static_cast<void *>(static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
+	return *(static_cast<T*>(static_cast<void *>(static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
 }
 
 template<class T> T* Pointer<T>::operator& () {
-   return (static_cast<T*>((static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
+	return (static_cast<T*>((static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
 }
 
 template<class T> T& Pointer<T>::Get() {
-   return *(static_cast<T*>(static_cast<void *>(static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
+	return *(static_cast<T*>(static_cast<void *>(static_cast<int*>(mm::get().GetObject(index, size)))) + 1);
 }

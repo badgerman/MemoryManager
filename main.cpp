@@ -60,11 +60,11 @@ static mm* Mem;
 static int UID = 0;
 
 static int atoi_s(const char *arg, int def) {
-    int val = atoi(arg);
-    if (val==0 && errno==EINVAL) {
-        return def;
-    }
-    return val;
+	int val = atoi(arg);
+	if (val == 0 && errno == EINVAL) {
+		return def;
+	}
+	return val;
 }
 
 int main(int argc, char **argv)
@@ -124,20 +124,19 @@ int main(int argc, char **argv)
 			if (i > 0) {
 				(*(test[j + i*n])).Up = ((test[j + (i - 1)*n]));
 			}
-			if( j > 0) {
+			if (j > 0) {
 				(*(test[j + i*n])).Left = ((test[(j - 1) + i*n]));
-            }
+			}
 			if (j < n - 1) {
 				(*(test[j + i*n])).Right = ((test[(j + 1) + i*n]));
 			}
 			if (i < m - 1) {
 				(*(test[j + i*n])).Down = ((test[j + (i + 1)*n]));
-            }
-
+			}
 		}
 	}
 	for (int i = 0; i < n / 10; ++i){
-		walker = test[(i*10) + 5 + 3 * n];
+		walker = test[(i * 10) + 5 + 3 * n];
 		while (walker.Get().passable){
 			walker.Get().passable = false;
 			walker = walker.Get().Down;
@@ -148,7 +147,7 @@ int main(int argc, char **argv)
 			walker = walker.Get().Up;
 		}
 	}
-	
+
 
 	//implement Djikstra's algorithm
 	float* dist = new float[UID];
@@ -259,6 +258,6 @@ int main(int argc, char **argv)
 	delete[] dist;
 	holder.Clear();
 	walker.Clear();
-	delete [] test;
+	delete[] test;
 	return 0;
 }
